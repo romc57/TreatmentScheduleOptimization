@@ -129,3 +129,18 @@ class StrictScheduler(Scheduler):
                             caretaker_assignments[ct.name][day][hour] = patient.pid
                             assigned = True
                         attempt += 1
+
+# --- Example Usage ---
+
+if __name__ == "__main__":
+    scheduler = StrictScheduler(num_caretakers=30, num_patients=80)
+    scheduler.generate_caretakers()
+    scheduler.assign_patients()
+    enforce_consistent_caretakers_per_profession(scheduler)
+
+    # Export schedules to Excel
+    patient_excel = scheduler.create_patient_workbook()
+    caretaker_excel = scheduler.create_caretaker_workbook()
+
+    print(f"Patient schedule saved to: {patient_excel}")
+    print(f"Caretaker schedule saved to: {caretaker_excel}")
