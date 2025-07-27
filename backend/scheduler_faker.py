@@ -94,6 +94,34 @@ class Scheduler:
         wb.save(path)
         return path
 
+    def export_json(self):
+        # Caretaker JSON: {caretaker: {day: {hour: patient}}}
+        caretaker_json = {}
+        for ct in self.caretakers:
+            grid = defaultdict(dict)
+            for patient in self.patients:
+                for d, h, cname, _ in patient.assignments:
+                    if cname == ct.name:
+                        grid[d][h] = patient.pid
+            caretaker_json[ct.name] = {day: hours for day, hours in grid.items()}
+
+        # Patient JSON: {patient: {day: {hour: caretaker}}}
+        patient_json = {}
+        for patient in self.patients:
+            grid = defaultdict(dict)
+            for d, h, cname, _ in patient.assignments:
+                grid[d][h] = cname
+            patient_json[patient.pid] = {day: hours for day, hours in grid.items()}
+
+        import json
+        with open("caretaker_schedule.json", "w") as f:
+            json.dump(caretaker_json, f, indent=2)
+        with open("patient_schedule.json", "w") as f:
+            json.dump(patient_json, f, indent=2)
+        print("Caretaker JSON written to caretaker_schedule.json")
+        print("Patient JSON written to patient_schedule.json")
+        return caretaker_json, patient_json
+
 def enforce_consistent_caretakers_per_profession(scheduler):
     for patient in scheduler.patients:
         profession_to_caretaker = {}
@@ -141,6 +169,9 @@ if __name__ == "__main__":
     # Export schedules to Excel
     patient_excel = scheduler.create_patient_workbook()
     caretaker_excel = scheduler.create_caretaker_workbook()
+
+    # Export schedules to JSON
+    scheduler.export_json()
 
     print(f"Patient schedule saved to: {patient_excel}")
     print(f"Caretaker schedule saved to: {caretaker_excel}")

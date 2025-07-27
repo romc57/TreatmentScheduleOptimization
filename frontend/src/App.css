@@ -1,0 +1,224 @@
+/* Reset and base styles */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  /* Black to dark grey gradient background */
+  background: linear-gradient(135deg, #111 0%, #333 100%);
+}
+
+.App {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(30, 30, 30, 0.98);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  max-width: 1600px;
+  margin: 2rem auto;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+h1 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 8px #b71c1c;
+  letter-spacing: 1px;
+}
+
+button {
+  transition: background 0.2s, color 0.2s;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  background: #b71c1c;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 6px;
+}
+button:hover, button:focus {
+  background: #fff;
+  color: #b71c1c;
+  border: 2px solid #b71c1c;
+}
+
+button.optimize-btn {
+  font-size: 1.15rem;
+  padding: 0.7rem 2.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+select {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1.5px solid #fff;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  background: #222;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Table styles */
+table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  background: #f5f5f5;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
+  width: 90vw;
+  max-width: 1400px;
+  font-size: 1.15rem;
+  border-radius: 12px;
+  overflow: hidden;
+}
+th, td {
+  border: 1px solid #b71c1c;
+  padding: 0.5rem 0.7rem;
+  text-align: center;
+  min-width: 3.2rem;
+  transition: background 0.2s;
+  color: #222;
+}
+th {
+  background: #b71c1c;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Caretaker and patient cell colors */
+td.caretaker-cell {
+  background: linear-gradient(135deg, #b71c1c 60%, #ff5252 100%);
+  color: #fff;
+  font-weight: bold;
+  box-shadow: 0 0 8px #b71c1c44;
+  border: 2px solid #fff;
+}
+td.patient-cell {
+  background: linear-gradient(135deg, #fff 60%, #e0e0e0 100%);
+  color: #b71c1c;
+  font-weight: bold;
+  box-shadow: 0 0 8px #fff4;
+  border: 2px solid #b71c1c;
+}
+
+/* Light mode styles */
+.light-mode {
+  background: #ededed !important;
+  color: #263238 !important;
+}
+.light-mode h1 {
+  color: #009688 !important;
+  text-shadow: none !important;
+}
+.light-mode button {
+  background: #009688 !important;
+  color: #fff !important;
+  border: 2px solid #009688 !important;
+}
+.light-mode button:hover, .light-mode button:focus {
+  background: #fff !important;
+  color: #009688 !important;
+  border: 2px solid #009688 !important;
+}
+.light-mode select {
+  background: #e0f2f1 !important;
+  color: #009688 !important;
+  border: 1.5px solid #009688 !important;
+}
+.light-mode table {
+  background: #fff !important;
+}
+.light-mode th {
+  background: #009688 !important;
+  color: #fff !important;
+}
+.light-mode td.caretaker-cell {
+  background: linear-gradient(135deg, #b2dfdb 60%, #009688 100%) !important;
+  color: #fff !important;
+  border: 2px solid #009688 !important;
+}
+.light-mode td.patient-cell {
+  background: linear-gradient(135deg, #fffde7 60%, #ffe082 100%) !important;
+  color: #fbc02d !important;
+  border: 2px solid #fbc02d !important;
+}
+
+/* Responsive design */
+@media (max-width: 900px) {
+  table {
+    font-size: 0.95rem;
+    width: 98vw;
+  }
+  th, td {
+    padding: 0.2rem 0.2rem;
+    min-width: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .App {
+    padding: 0.2rem;
+  }
+  table {
+    font-size: 0.8rem;
+    max-width: 98vw;
+    overflow-x: auto;
+    display: block;
+  }
+  th, td {
+    padding: 0.1rem 0.1rem;
+    min-width: 1.2rem;
+  }
+  select {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+}
+
+/* Tab and dropdown area */
+@media (max-width: 600px) {
+  .tab-area, .dropdown-area {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+}
