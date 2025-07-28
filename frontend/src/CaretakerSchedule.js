@@ -1,58 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const hours = Array.from({ length: 12 }, (_, i) => `${i + 7}:00`);
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const hours = Array.from({ length: 10 }, (_, i) => i + 8); // 8-17
 
-function defaultFaker() {
-  // Generate random fake data for 3 caregivers
-  const names = ['Alice', 'Bob', 'Carol'];
-  const hourIdx = Array.from({ length: 12 }, (_, i) => i);
-  return names.map(name => ({
-    name,
-    schedule: Object.fromEntries(days.map(day => [day, hourIdx.filter(() => Math.random() < 0.15)])),
-  }));
-}
-
-function CaretakerSchedule({ selectedCaregiver, caregivers, generator, onRequestData }) {
-  // Use generator if provided, otherwise use caregivers prop or default faker
-  const [internalCaregivers, setInternalCaregivers] = useState([]);
-
-  useEffect(() => {
-    let data = caregivers;
-    if (generator) {
-      data = generator();
-    }
-    if (!data || !data.length) {
-      data = defaultFaker();
-    }
-    setInternalCaregivers(data);
-  }, [caregivers, generator]);
-
-  const caregiver = internalCaregivers.find(c => c.name === selectedCaregiver) || internalCaregivers[0] || { schedule: {} };
-
-  useEffect(() => {
-    if (!internalCaregivers.length && typeof onRequestData === 'function') {
-      onRequestData();
-    }
-  }, [internalCaregivers, onRequestData]);
+function CaretakerSchedule({ selectedCaregiver, caregivers }) {
+  const caregiverList = caregivers || [];
+  const caregiver = caregiverList.find(c => c.name === selectedCaregiver) || caregiverList[0];
 
   return (
-    <table border="1">
-      <thead>
+    <table border="1" style={{ background: 'var(--table-bg, #fff)' }}>
+      <thead style={{ background: 'var(--thead-bg, #f5f5f5)' }}>
         <tr>
           <th>Hour/Day</th>
           {days.map(day => <th key={day}>{day}</th>)}
         </tr>
       </thead>
       <tbody>
-        {hours.map((hour, i) => (
+        {hours.map((hour) => (
           <tr key={hour}>
-            <td>{hour}</td>
-            {days.map(day => (
-              <td key={day} className={caregiver.schedule[day]?.includes(i) ? 'caretaker-cell' : ''}>
-                {caregiver.schedule[day]?.includes(i) ? '✔' : ''}
-              </td>
-            ))}
+            <td style={{ background: 'var(--thead-bg, #f5f5f5)' }}>{hour}:00</td>
+            {days.map(day => {
+              let patient = '';
+              if (caregiver && caregiver.schedule && caregiver.schedule[day] && typeof caregiver.schedule[day] === 'object') {
+                patient = caregiver.schedule[day][hour] || '';
+              }
+              return (
+                <td
+                  key={day}
+                  className={patient ? 'caretaker-cell' : ''}
+                  style={{ background: patient ? 'var(--cell-bg, #e0f7fa)' : 'inherit', color: patient ? '#000' : 'inherit' }}
+                >
+                  {patient}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -60,7 +41,5 @@ function CaretakerSchedule({ selectedCaregiver, caregivers, generator, onRequest
   );
 }
 
-export const caregiverNames = [
-  'Alice', 'Bob', 'Carol'
-];
+export const caregiverNames = [];
 export default CaretakerSchedule;

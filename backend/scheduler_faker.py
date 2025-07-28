@@ -170,8 +170,5 @@ if __name__ == "__main__":
     patient_excel = scheduler.create_patient_workbook()
     caretaker_excel = scheduler.create_caretaker_workbook()
 
-    # Export schedules to JSON
-    scheduler.export_json()
-
     print(f"Patient schedule saved to: {patient_excel}")
     print(f"Caretaker schedule saved to: {caretaker_excel}")

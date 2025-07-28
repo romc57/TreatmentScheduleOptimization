@@ -1,53 +1,30 @@
 import React from 'react';
 
-const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const hours = Array.from({ length: 12 }, (_, i) => `${i + 7}:00`);
+const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const hours = Array.from({ length: 10 }, (_, i) => i + 8); // 8-17
 
 function PatientSchedule({ selectedPatient, patients }) {
-  // Use passed patients or default
-  const defaultPatients = [
-    {
-      name: 'David',
-      schedule: {
-        Tuesday: [3, 4, 5],
-        Thursday: [8, 9, 10],
-        Sunday: [1, 2, 3],
-      },
-    },
-    {
-      name: 'Emma',
-      schedule: {
-        Monday: [2, 3, 4],
-        Wednesday: [6, 7, 8],
-        Saturday: [9, 10, 11],
-      },
-    },
-    {
-      name: 'Frank',
-      schedule: {
-        Friday: [0, 1, 2],
-        Thursday: [13, 14, 15],
-        Sunday: [7, 8, 9],
-      },
-    },
-  ];
-  const patientList = patients || defaultPatients;
+  const patientList = patients || [];
   const patient = patientList.find(p => p.name === selectedPatient) || patientList[0];
   return (
-    <table border="1">
-      <thead>
+    <table border="1" style={{ background: 'var(--table-bg, #fff)' }}>
+      <thead style={{ background: 'var(--thead-bg, #f5f5f5)' }}>
         <tr>
           <th>Hour/Day</th>
           {days.map(day => <th key={day}>{day}</th>)}
         </tr>
       </thead>
       <tbody>
-        {hours.map((hour, i) => (
+        {hours.map((hour) => (
           <tr key={hour}>
-            <td>{hour}</td>
+            <td style={{ background: 'var(--thead-bg, #f5f5f5)' }}>{hour}:00</td>
             {days.map(day => (
-              <td key={day} className={patient.schedule[day]?.includes(i) ? 'patient-cell' : ''}>
-                {patient.schedule[day]?.includes(i) ? '●' : ''}
+              <td
+                key={day}
+                className={patient && Array.isArray(patient.schedule[day]) && patient.schedule[day].includes(hour) ? 'patient-cell' : ''}
+                style={{ background: patient && Array.isArray(patient.schedule[day]) && patient.schedule[day].includes(hour) ? 'var(--cell-bg, #ffe0e0)' : 'inherit' }}
+              >
+                {patient && Array.isArray(patient.schedule[day]) && patient.schedule[day].includes(hour) ? '●' : ''}
               </td>
             ))}
           </tr>
@@ -57,7 +34,5 @@ function PatientSchedule({ selectedPatient, patients }) {
   );
 }
 
-export const patientNames = [
-  'David', 'Emma', 'Frank'
-];
+export const patientNames = [];
 export default PatientSchedule;

@@ -1,69 +1,81 @@
 import './App.css';
 import CaretakerSchedule, { caregiverNames } from './CaretakerSchedule';
 import PatientSchedule, { patientNames } from './PatientSchedule';
-import React, { useState } from 'react';
-
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
-
-function randomizeSchedules() {
-  // Randomize fake data for caregivers
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const hours = Array.from({ length: 12 }, (_, i) => i); // 0-11 for 7:00-18:00
-  const caregivers = [
-    {
-      name: 'Alice',
-      schedule: Object.fromEntries(days.map(day => [day, hours.filter(() => Math.random() < 0.15)])),
-    },
-    {
-      name: 'Bob',
-      schedule: Object.fromEntries(days.map(day => [day, hours.filter(() => Math.random() < 0.15)])),
-    },
-    {
-      name: 'Carol',
-      schedule: Object.fromEntries(days.map(day => [day, hours.filter(() => Math.random() < 0.15)])),
-    },
-  ];
-  // Randomize fake data for patients
-  const patients = [
-    {
-      name: 'David',
-      schedule: Object.fromEntries(days.map(day => [day, hours.filter(() => Math.random() < 0.15)])),
-    },
-    {
-      name: 'Emma',
-      schedule: Object.fromEntries(days.map(day => [day, hours.filter(() => Math.random() < 0.15)])),
-    },
-    {
-      name: 'Frank',
-      schedule: Object.fromEntries(days.map(day => [day, hours.filter(() => Math.random() < 0.15)])),
-    },
-  ];
-  return { caregivers, patients };
-}
+import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('caretaker');
+  // Persist activeTab in localStorage
+  const getInitialTab = () => {
+    const saved = localStorage.getItem('activeTab');
+    return saved === 'patient' ? 'patient' : 'caretaker';
+  };
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [selectedCaregiver, setSelectedCaregiver] = useState(caregiverNames[0]);
   const [selectedPatient, setSelectedPatient] = useState(patientNames[0]);
   const [lightMode, setLightMode] = useState(false);
-  const [fakerData, setFakerData] = useState(null);
+  const [caregivers, setCaregivers] = useState();
+  const [patients, setPatients] = useState();
 
-  const handleOptimize = () => {
-    setFakerData(randomizeSchedules());
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
+
+  // Load caregivers from localStorage on mount
+  useEffect(() => {
+    const savedCaregivers = localStorage.getItem('caregivers');
+    if (savedCaregivers) setCaregivers(JSON.parse(savedCaregivers));
+    const savedPatients = localStorage.getItem('patients');
+    if (savedPatients) setPatients(JSON.parse(savedPatients));
+  }, []);
+
+  // Save caregivers and patients to localStorage when changed
+  useEffect(() => {
+    if (caregivers) localStorage.setItem('caregivers', JSON.stringify(caregivers));
+    if (patients) localStorage.setItem('patients', JSON.stringify(patients));
+  }, [caregivers, patients]);
+
+  // Import schedule handler (Excel in-browser, each sheet = caretaker, rows = hours, cols = days, cells = patient names)
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      // Each sheet is a caretaker, rows = hours, cols = days, cells = patient names
+      const caregivers = workbook.SheetNames.map(sheetName => {
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        if (!rows.length) return null;
+        const days = rows[0].slice(1); // skip first col (hour label)
+        const schedule = {};
+        days.forEach(day => { schedule[day] = {}; });
+        for (let r = 1; r < rows.length; r++) {
+          const hour = rows[r][0];
+          for (let c = 1; c < rows[r].length; c++) {
+            const patient = rows[r][c];
+            if (patient !== undefined && patient !== null && patient !== "") {
+              const day = days[c - 1];
+              schedule[day][hour] = patient;
+            }
+          }
+        }
+        return { name: sheetName, schedule };
+      }).filter(Boolean);
+      setCaregivers(caregivers);
+      setPatients(); // Clear patients table
+      localStorage.setItem('caregivers', JSON.stringify(caregivers));
+      localStorage.removeItem('patients');
+    };
+    reader.readAsArrayBuffer(file);
   };
-
-  // Use fakerData if present, otherwise use default
-  const caregivers = fakerData ? fakerData.caregivers : undefined;
-  const patients = fakerData ? fakerData.patients : undefined;
 
   return (
     <div className={lightMode ? 'App light-mode' : 'App'}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <button
           className="optimize-btn"
-          onClick={handleOptimize}
           style={{
             background: lightMode ? '#009688' : '#b71c1c',
             color: '#fff',
@@ -72,6 +84,7 @@ function App() {
             marginLeft: '1rem',
             cursor: 'pointer',
           }}
+          disabled
         >
           Optimize
         </button>
@@ -138,6 +151,28 @@ function App() {
             })}
           </select>
         )}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+        <label htmlFor="import-schedule" style={{
+          background: lightMode ? '#009688' : '#b71c1c',
+          color: '#fff',
+          border: '2px solid',
+          borderColor: lightMode ? '#009688' : '#b71c1c',
+          marginLeft: '1rem',
+          cursor: 'pointer',
+          padding: '0.5rem 1.2rem',
+          borderRadius: '6px',
+          fontWeight: 600
+        }}>
+          Import Schedule
+          <input
+            id="import-schedule"
+            type="file"
+            accept=".xlsx,.xls"
+            style={{ display: 'none' }}
+            onChange={handleImport}
+          />
+        </label>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {activeTab === 'caretaker' && (
