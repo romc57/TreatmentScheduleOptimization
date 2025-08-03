@@ -71,6 +71,43 @@ function App() {
     reader.readAsArrayBuffer(file);
   };
 
+  // Converts caregivers state to backend JSON format
+  function getScheduleJsonFromUI(caregivers) {
+    if (!caregivers) return { caretakers: [] };
+    // Expected backend format: { caretakers: [ { name, schedule: { day: { hour: patient } } } ] }
+    return {
+      caretakers: caregivers.map(cg => ({
+        name: cg.name,
+        schedule: cg.schedule
+      }))
+    };
+  }
+
+  // Optimize schedule by calling backend and updating UI
+  async function handleOptimize() {
+    if (!caregivers || !caregivers.length) return;
+    // Convert caregivers state to backend JSON format
+    const scheduleJson = getScheduleJsonFromUI(caregivers);
+    // Log the JSON before sending to backend
+    console.log('Sending schedule JSON to backend:', scheduleJson);
+    // Encode JSON as a query parameter for GET request
+    const query = encodeURIComponent(JSON.stringify(scheduleJson));
+    try {
+      const response = await fetch(`http://localhost:8000/optimize-schedule/?data=${query}`);
+      if (!response.ok) throw new Error('API error');
+      const result = await response.json();
+      // Map optimized caretakers to expected format
+      const mappedCaregivers = result.caretakers.map(cg => ({
+        name: cg.name,
+        schedule: cg.schedule
+      }));
+      setCaregivers(mappedCaregivers);
+      localStorage.setItem('caregivers', JSON.stringify(mappedCaregivers));
+    } catch (err) {
+      alert('Failed to optimize schedule: ' + err.message);
+    }
+  }
+
   return (
     <div className={lightMode ? 'App light-mode' : 'App'}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -84,7 +121,8 @@ function App() {
             marginLeft: '1rem',
             cursor: 'pointer',
           }}
-          disabled
+          onClick={handleOptimize}
+          disabled={!caregivers || !caregivers.length}
         >
           Optimize
         </button>
