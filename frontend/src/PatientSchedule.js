@@ -18,15 +18,21 @@ function PatientSchedule({ selectedPatient, patients }) {
         {hours.map((hour) => (
           <tr key={hour}>
             <td style={{ background: 'var(--thead-bg, #f5f5f5)' }}>{hour}:00</td>
-            {days.map(day => (
-              <td
-                key={day}
-                className={patient && Array.isArray(patient.schedule[day]) && patient.schedule[day].includes(hour) ? 'patient-cell' : ''}
-                style={{ background: patient && Array.isArray(patient.schedule[day]) && patient.schedule[day].includes(hour) ? 'var(--cell-bg, #ffe0e0)' : 'inherit' }}
-              >
-                {patient && Array.isArray(patient.schedule[day]) && patient.schedule[day].includes(hour) ? '●' : ''}
-              </td>
-            ))}
+            {days.map(day => {
+              const caretaker = patient?.schedule?.[day]?.[hour];
+              return (
+                <td
+                  key={day}
+                  className={caretaker ? 'patient-cell' : ''}
+                  style={{ 
+                    background: caretaker ? 'var(--cell-bg, #ffe0e0)' : 'inherit',
+                    padding: '0.5rem'
+                  }}
+                >
+                  {caretaker || ''}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
