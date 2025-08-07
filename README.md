@@ -1,6 +1,6 @@
 # Treatment Schedule Optimization
 
-A web application for optimizing and managing treatment schedules between caretakers and patients. This project was developed with the assistance of Large Language Models (LLMs).
+A web application for optimizing and managing treatment schedules between car## 📊 Data Formats & Test Data
 
 ## 🌟 Features
 
@@ -37,8 +37,13 @@ TreatmentScheduleOptimization/
 │   │   ├── CaretakerSchedule.js   # Caretaker view component
 │   │   ├── PatientSchedule.js     # Patient view component
 │   │   └── App.css                # Application styles
-├── optimized_scheduler.py         # Backend optimization logic
-└── scheduler_faker.py            # Test data generation
+├── backend/
+│   ├── .venv/                     # Python virtual environment
+│   ├── api
+│   ├── optimized_scheduler.py     # FastAPI server & optimization logic
+│   ├── scheduler_faker.py         # Test data generation
+│   └── requirements.txt           # Python dependencies
+└── README.md                      # Project documentation
 ```
 
 ## 🚀 Getting Started
@@ -58,14 +63,35 @@ TreatmentScheduleOptimization/
    ```
 
 ### Backend Setup
-1. Install Python dependencies:
+1. Make sure Python 3.8+ is installed
+2. Navigate to the backend directory:
    ```bash
+   cd backend
+   ```
+3. Create and activate a virtual environment:
+   ```bash
+   # Create virtual environment
+   python -m venv .venv
+
+   # Activate on Linux/Mac
+   source .venv/bin/activate
+   
+   # Activate on Windows
+   .\.venv\Scripts\activate
+   ```
+4. Install required Python packages:
+   ```bash
+   pip install fastapi uvicorn numpy ortools
+   # Or install from requirements.txt
    pip install -r requirements.txt
    ```
-2. Run the backend server:
+5. Start the backend server:
    ```bash
-   python optimized_scheduler.py
+   cd backend
+   uvicorn app --reload --host 0.0.0.0 --port 8000
    ```
+
+Note: The backend server must be running on port 8000 for the frontend to connect properly.
 
 ## 💡 Usage
 
@@ -84,7 +110,31 @@ TreatmentScheduleOptimization/
    - The backend will process and return an optimized schedule
    - Both views will update automatically
 
-## 🛠️ Technical Implementation
+## � Data Formats & Examples
+
+### Schedule Formats
+Example files showing the correct structure for both Excel input and JSON data formats can be found in the `examples/` directory:
+- `caretaker_schedule_oop.xlsx` - Template for Excel import
+- `input_data.json` - Caretaker schedule format
+
+
+### Excel Schedule Format
+The input Excel file should follow this format:
+- Each sheet represents a caretaker
+- Sheet name format: "Caretaker Name (role)" e.g., "John Smith (nurse)"
+- First row: Days of the week
+- First column: Hours (8-17)
+- Cells: Patient names
+
+### Generate Test Data
+To create test data for development or testing:
+```bash
+python scheduler_faker.py --output schedule.xlsx
+```
+
+This will generate a valid schedule with random caretakers and patients that you can use to test the application.
+
+## �🛠️ Technical Implementation
 
 - **Frontend**: React.js with modular components and custom hooks
 - **Backend**: Python with optimization algorithms
